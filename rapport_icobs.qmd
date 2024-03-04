@@ -1,0 +1,89 @@
+---
+subtitle: "Rapport Statistique v1.O"
+cache: false
+---
+
+```{r}
+#| label: lib
+
+rm(list = ls())
+expx <- FALSE
+classeur <-"ic_obs1.xls"
+#
+library(baseph)
+library(janitor)
+library(tidyverse)
+library(gtsummary)
+library(kableExtra)
+library(kableExtra)
+library(labelled)
+library(epiDisplay)
+library(visdat)
+library(sf)
+library(mapsf)
+library(colorspace)
+library(xlsx)
+#
+theme_gtsummary_language(language = "fr", decimal.mark = ",")
+options(OutDec = ",")
+```
+
+# Contrôle de l'échantillon
+
+
+## Données manquantes
+
+```{r}
+#| label: fig-manq-apt
+#| fig-cap: Données manquantes (questionnaire patient)
+
+vis_dat(ttpat, palette = "qual")
+
+```
+
+# Description de la population
+
+
+L'échantillon comporte `r nrow(ttpat)` cas pour `r ncol(ttpat)` variables.
+
+## Profil du patient
+
+### Démographie
+
+
+```{r}
+#| label: tbl-desc1
+#| tbl-cap: Caractéristiques démographiques
+
+ttpat |>
+ dplyr::select(2:5) |>
+ tbl_summary(missing = "no") |>
+ modify_header(label ~ " ") |>
+ add_n() |>
+ bold_labels() |>
+ pexptabph(
+ lg = FALSE,
+ exp = expx,
+ nomfich = classeur,
+ nomsheet = "desc1"
+ )
+```
+
+```{r}
+#| label: fig-pyr
+#| fig-cap: Pyramide des âges
+pyramid(ttpat$age2,ttpat$sexe, col.gender = c("pink", "lightblue"), binwidth = 10, main = "Pyramide des âges")
+``` 
+
+
+# Technique
+
+Le risque $\alpha$ retenu a été de 0,05 & la puissance de 0,8. La seule donnée numérique (âge des patients) a été discrétisée. 
+
+Toutes les données ont été présentées par le nombre pour chaque classe de réponse avec le pourcentage. Pour les réponses en oui/non seuls les `oui` ont été présentés.
+
+Sauf indication contraires pour les tests simples un test du $\chi^2$ de Pearson a été utilisé sous réserve d'un effectif suffisant. À défaut un test exact de Fischer a été utilisé. Un modèle de régression logistique a été employé. Ce modèle de régression a été limité aux facteurs associés à la réponse en utilisant les critères ayant une la réponse significative avec un seuil p.value = 0,2 lors de l’étape précédente. Une recherche du meilleur modèle a été réalisée par un step-by-step descendant évaluée par le critère d’information d’Akaike. Des graphiques ont été réalisés pour les résultats importants.
+
+L'analyse statistique a été réalisée grâce au logiciel **R**[@rstat] & à divers packages en particulier `tidyverse`[@tidy] & `baseph`[@baseph].
+
+
